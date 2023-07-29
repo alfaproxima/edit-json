@@ -1,14 +1,20 @@
 import * as fs from 'fs';
+import { parse } from './parse/parse';
 
-const file = fs.readFileSync('./test.json').toString();
+// const file = fs.readFileSync('./test.json').toString();
+const obj = JSON.parse(file);
+const tree = parse(obj);
 
 // API
-// parse(string) -> JsonUpdater
-// json = JsonUpdater
-// json.key('scripts.build', 'build:app');
-// json.key('engines[].key', 'newKey');
-// json.key('engines[0].key', 'newKey');
-// json.value('scripts.build:app', 'node build.js');
+// json = new JsonUpdater(object | Json string);
+// json.add('key', 'value');
+// json.remove('key');
+// json.updateKey('old key', 'new key');
+// json.updateKey('scripts.build', 'build:app');
+// json.updateKey('engines[].key', 'newKey');
+// json.updateKey('engines[0].key', 'newKey');
+// json.updateValue('scripts.build:app', 'node build.js');
+// json.updateValue('scripts.build:app', { "name": "John" }});
 // json.toObject() -> Object
 // json.toJson() -> string
 
@@ -20,8 +26,8 @@ const file = fs.readFileSync('./test.json').toString();
 //             {key: 'da', type: 'string', value: 'value'}
 //         ]},
 //     {key: 'e', type: 'array', value: [
-//             {index: 0, type: 'string', value: 'value'},
-//             {index: 1, type: 'object', value: [
+//             {key: 0, type: 'string', value: 'value'},
+//             {key: 1, type: 'object', value: [
 //                 {key: 'ea', type: 'string', value: 'value'}
 //             ]},
 //         ]},
@@ -29,25 +35,21 @@ const file = fs.readFileSync('./test.json').toString();
 
 class JsonUpdater {
     private object: any;
-    private array: any[];
+    private tree: any[];
 
     constructor(json: string) {
-        // TODO: right now json get parsed to object
-        //       and then to syntax tree.
-        //       Use parser from string to syntax tree.
         try {
             this.object = JSON.parse(json);
         } catch(err) {
             console.error(`Couldn't parse json from a string.`, err);
         }
 
-        this.array = parse(this.object);
+        this.tree = parse(this.object);
     }
-}
 
-// Parse object and makes syntax tree
-function parse(json: string): any[] {
-
+    toObject() {
+        return this.object;
+    }
 }
 
 function readPath(path: string): any {
