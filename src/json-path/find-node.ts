@@ -1,7 +1,7 @@
 import { JsonPath, JsonPathParam } from './json-path';
 import { JsonNode } from '../parse/node';
 
-export function find(path: JsonPath, tree: JsonNode): JsonNode | JSONNode[] | undefined {
+export function find(path: JsonPath, tree: JsonNode): JsonNode | JsonNode[] | undefined {
     let node = tree;
 
     for (let key of path) {
