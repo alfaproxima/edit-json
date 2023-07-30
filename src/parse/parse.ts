@@ -15,7 +15,7 @@ export function parse(obj: Record<string, any> | Record<string, any>[]): JsonNod
         value: [],
     }
 
-    tree.value.push(parseJson(tree, obj));
+    tree.value = parseJson(tree, obj);
 
     return tree;
 }

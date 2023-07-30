@@ -1,12 +1,18 @@
 import * as fs from 'fs';
 import { parse } from './parse/parse';
+import { JsonNode } from './parse/node';
+import { find } from './json-path/find-node';
+import { parseJsonPath } from './json-path/find-node';
 
 // const file = fs.readFileSync('./test.json').toString();
-const obj = JSON.parse(file);
-const tree = parse(obj);
-
+// const obj = JSON.parse(file);
+// const tree = parse(obj);
+// console.log(JSON.stringify(tree, null, 2));
 // API
-// json = new JsonUpdater(object | Json string);
+// json = new JsonUpdater(object | Json string, {
+//     ignoreNotExist: true,
+//     saveIndent: true,
+// });
 // json.add('key', 'value');
 // json.remove('key');
 // json.updateKey('old key', 'new key');
@@ -35,9 +41,10 @@ const tree = parse(obj);
 
 class JsonUpdater {
     private object: any;
-    private tree: any[];
+    private tree: JsonNode[];
+    private ignoreNotExist: boolean = false;
 
-    constructor(json: string) {
+    constructor(json: string, options: any) {
         try {
             this.object = JSON.parse(json);
         } catch(err) {
@@ -47,13 +54,28 @@ class JsonUpdater {
         this.tree = parse(this.object);
     }
 
+    get<T = any>(path: string): T {
+        try {
+            const parsedPath = parseJsonPath(path);
+            const node = find(parsedPath, this.tree);
+
+            if (node) {
+                return node.value;
+            } else {
+                if (!this.ignoreNotExist) {
+                    console.error(`Couldn't find ${path} in json!`);
+                }
+
+                return undefined;
+            }
+        } catch(error) {
+            throw Error(`Couldn't parse path parameter "${path}"`);
+        }
+    }
+
     toObject() {
         return this.object;
     }
-}
-
-function readPath(path: string): any {
-
 }
 
 // Find node in syntax tree by path
