@@ -45,6 +45,7 @@ function findNode(key: JsonPathParam, node: JsonNode[]): JsonNode {
 
 function findNodes(key: JsonPathParam, nodes: JsonNode[]): JsonNode[] {
     const result = [];
+
     for (let node of nodes) {
         if (node.type === 'array' || node.type === 'object') {
             result.push(findNode(key, node.value));

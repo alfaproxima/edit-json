@@ -20,38 +20,38 @@ export function parse(obj: Record<string, any> | Record<string, any>[]): JsonNod
     return tree;
 }
 
-function parseJson(parent: JsonNode, val: any): JsonNode[] {
+export function parseJson(parent: JsonNode, val: any): JsonNode[] {
     const result = [];
 
     if (parent.type === 'array') {
         for (let i = 0; i < val.length; i++) {
-            result.push(createNode(result, i));
+            result.push(createNode(i, val[i]));
         }
     }
 
     if (parent.type === 'object') {
         for (let key of Object.keys(val)) {
-            result.push(createNode(result, key));
+            result.push(createNode(key, val[key]));
         }
     }
 
     return result;
+}
 
-    function createNode(result: JsonNode[], key: string | number) {
-        let node: JsonNode = {
-            key: key,
-            type: undefined,
-            value: undefined,
-        };
+export function createNode(key: string | number, value: any): JsonNode {
+    let node: JsonNode = {
+        key: key,
+        type: undefined,
+        value: undefined,
+    };
 
-        node = parseValue(node, val[key]);
+    node = parseValue(node, value);
 
-        if (node.type === 'array' || node.type === 'object') {
-            node.value = parseJson(node, val[key]);
-        }
-
-        return node;
+    if (node.type === 'array' || node.type === 'object') {
+        node.value = parseJson(node, value);
     }
+
+    return node;
 }
 
 function parseValue(node: JsonNode, val: any) {

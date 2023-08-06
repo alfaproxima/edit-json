@@ -2,11 +2,17 @@ import * as fs from 'fs';
 import { parse } from './parse/parse';
 import { JsonNode } from './parse/node';
 import { find } from './json-path/find-node';
-import { parseJsonPath } from './json-path/find-node';
+import { parseJsonPath } from './json-path/json-path';
+import { add, addAtIndex, addAtKey } from './commands/add';
 
 // const file = fs.readFileSync('./test.json').toString();
 // const obj = JSON.parse(file);
 // const tree = parse(obj);
+// const json = new JsonUpdater(file, {
+//     ignoreNotExist: true,
+//     saveIndent: true,
+// });
+
 // console.log(JSON.stringify(tree, null, 2));
 // API
 // json = new JsonUpdater(object | Json string, {
@@ -14,6 +20,11 @@ import { parseJsonPath } from './json-path/find-node';
 //     saveIndent: true,
 // });
 // json.add('key', 'value');
+// json.add('key[]', 'value');
+// json.addBefore('key', 'newKey', 'value');
+// json.addAfter('key', 'newKey', 'value');
+// json.addBefore('key[1]', 'value');
+// json.addAfter('key[1]', 'value');
 // json.remove('key');
 // json.updateKey('old key', 'new key');
 // json.updateKey('scripts.build', 'build:app');
@@ -73,17 +84,64 @@ class JsonUpdater {
         }
     }
 
+    add(path: string, value: any): boolean {
+        try {
+            const parsedPath = parseJsonPath(path);
+            const node = find(parsedPath.slice(0, parsedPath.length - 1), this.tree);
+
+            return add(parsedPath[parsedPath.length - 1], value, node);
+        } catch(error) {
+            console.error(`Couldn't add at path "${path}"`);
+            return false;
+        }
+    }
+
+    // TODO: Add overloading
+    addBefore(path: string, newKey: string, value: any): string | number | undefined {
+        try {
+            const parsedPath = parseJsonPath(path);
+            const key = parsedPath[parsedPath.length - 1];
+            const node = find(parsedPath.slice(0, parsedPath.length - 1), this.tree);
+
+            if (arguments.length === 3 && newKey && (typeof key === 'string')) {
+                return addAtKey('before', key, newKey, value, node);
+            } else if (arguments.length === 2 && (typeof key === 'number')) {
+                return addAtIndex('before', key, newKey, node);
+            } else {
+                console.error(`Only can add indixes or keys`);
+                return;
+            }
+        } catch(error) {
+            console.error(`Couldn't add before ${key} in ${parsedPath}`);
+            return;
+        }
+    }
+
+    addAfter(path: string, newKey: string, value: any): string | number | undefined {
+        try {
+            const parsedPath = parseJsonPath(path);
+            const key = parsedPath[parsedPath.length - 1];
+            const node = find(parsedPath.slice(0, parsedPath.length - 1), this.tree);
+
+            if (arguments.length === 3 && newKey && (typeof key === 'string')) {
+                return addAtKey('after', key, newKey, value, node);
+            } else if (arguments.length === 2 && (typeof key === 'number')) {
+                return addAtIndex('after', key, newKey, node);
+            } else {
+                console.error(`Only can add indixes or keys`);
+                return;
+            }
+        } catch(error) {
+            console.error(`Couldn't add after ${key} in ${parsedPath}`);
+            return;
+        }
+    }
+
     toObject() {
         return this.object;
     }
-}
 
-// Find node in syntax tree by path
-function findNode(array: any[], path: string): any {
-
-}
-
-// Make object from syntax tree;
-function format(array: any[]): string {
-
+    // toTree() {
+    //     return JSON.stringify(this.tree, null, 2);
+    // }
 }

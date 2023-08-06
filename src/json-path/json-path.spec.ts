@@ -5,6 +5,10 @@ describe('JsonPath', () => {
         expect(parseJsonPath('a.b.c')).toEqual(['a', 'b', 'c']);
     });
 
+    it('Should return array with the key', () => {
+        expect(parseJsonPath('files')).toEqual(['files']);
+    });
+
     it('Should return array with all the keys and indexes', () => {
         expect(parseJsonPath('a.build[0]')).toEqual(['a', 'build', 0]);
     });
