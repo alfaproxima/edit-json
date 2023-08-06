@@ -7,15 +7,13 @@ import { add, addAtIndex, addAtKey } from './commands/add';
 
 // const file = fs.readFileSync('./test.json').toString();
 // const obj = JSON.parse(file);
-// const tree = parse(obj);
-// const json = new JsonUpdater(file, {
+// const json = new ObjectUpdater(obj, {
 //     ignoreNotExist: true,
 //     saveIndent: true,
 // });
 
-// console.log(JSON.stringify(tree, null, 2));
 // API
-// json = new JsonUpdater(object | Json string, {
+// json = new ObjectUpdater(object | Json string, {
 //     ignoreNotExist: true,
 //     saveIndent: true,
 // });
@@ -49,28 +47,46 @@ import { add, addAtIndex, addAtKey } from './commands/add';
 //             ]},
 //         ]},
 // ]
+export interface UpdaterOptions {
+    ignoreNotExist?: boolean;
+    saveIndent?: boolean;
+} 
 
-class JsonUpdater {
+export default class ObjectUpdater {
     private object: any;
     private tree: JsonNode[];
+    // Options
     private ignoreNotExist: boolean = false;
+    private saveIndent: boolean = false;
 
-    constructor(json: string, options: any) {
-        try {
-            this.object = JSON.parse(json);
-        } catch(err) {
-            console.error(`Couldn't parse json from a string.`, err);
+    constructor(json: object, options?: UpdaterOptions) {
+        if (typeof json === 'object') {
+            this.object = json;
+        } else {
+            console.error(`Parameneter for update is not an object.`);
+
+            return;
         }
 
         this.tree = parse(this.object);
+
+        if (options) {
+            this.ignoreNotExist = option.ignoreNotExist;
+            this.saveIndent = option.saveIndent;
+        }
     }
 
+    // TODO: make format values from AST to actual value
     get<T = any>(path: string): T {
         try {
             const parsedPath = parseJsonPath(path);
             const node = find(parsedPath, this.tree);
 
             if (node) {
+                if (Array.isArray(node)) {
+                    return node.map(it => it.value);
+                }
+
                 return node.value;
             } else {
                 if (!this.ignoreNotExist) {
@@ -87,9 +103,10 @@ class JsonUpdater {
     add(path: string, value: any): boolean {
         try {
             const parsedPath = parseJsonPath(path);
-            const node = find(parsedPath.slice(0, parsedPath.length - 1), this.tree);
+            const node = find(parsedPath.slice(0, parsedPath.length - 1), this.tree, true);
+            const result = add(parsedPath[parsedPath.length - 1], value, node);
 
-            return add(parsedPath[parsedPath.length - 1], value, node);
+            return result;
         } catch(error) {
             console.error(`Couldn't add at path "${path}"`);
             return false;
@@ -141,7 +158,11 @@ class JsonUpdater {
         return this.object;
     }
 
-    // toTree() {
-    //     return JSON.stringify(this.tree, null, 2);
-    // }
+    toTree() {
+        return this.tree;
+    }
+
+    toJsonTree() {
+        return JSON.stringify(this.tree, null, 2);
+    }
 }

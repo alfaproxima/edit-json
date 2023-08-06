@@ -1,4 +1,4 @@
-import { TREE_MOCK } from './mock/tree-mock';
+import { TREE_MOCK } from '../mock/tree-mock';
 import { find } from './find-node';
 
 describe('Find Node by json path', () => {
@@ -48,5 +48,29 @@ describe('Find Node by json path', () => {
               "value": "main.js"
             }
         ]);
+    });
+
+    it('Should create node if key in the path doesnt exist', () => {
+        expect(find(
+            ['scripts'],
+            { root: true, type: 'object', value: [] },
+            true)
+        ).toEqual({
+            "key": 'scripts',
+            "type": "object",
+            "value": []
+        });
+    });
+
+    it('Should create nodes if keys in the path doesnt exist', () => {
+        expect(find(
+            ['scripts', 'test'],
+            { root: true, type: 'object', value: [] },
+            true)
+        ).toEqual({
+            "key": 'test',
+            "type": "object",
+            "value": []
+        });
     });
 });

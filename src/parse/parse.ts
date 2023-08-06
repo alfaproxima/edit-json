@@ -54,6 +54,46 @@ export function createNode(key: string | number, value: any): JsonNode {
     return node;
 }
 
+export function createEmptyNodes(path: JsonPath): JsonNode {
+    if (!path.length) {
+        return undefined;
+    }
+
+    let tree;
+    let node;
+
+    for (let i = 0; i < path.length; i++) {
+        const key = path[i];
+
+        if (typeof key !== 'string') {
+            return tree;
+        }
+
+        if (!tree) {
+            tree = {
+                key: key,
+                type: 'object',
+                value: []
+            };
+
+            node = tree;
+
+            continue;
+        }
+
+        node.value.push({
+            key: key,
+            type: 'object',
+            value: []
+        });
+
+        node = node.value[0];
+    }
+
+
+    return tree;
+}
+
 function parseValue(node: JsonNode, val: any) {
     switch(true) {
         case typeof val === 'string': {

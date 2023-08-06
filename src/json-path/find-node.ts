@@ -1,11 +1,20 @@
 import { JsonPath, JsonPathParam } from './json-path';
 import { JsonNode } from '../parse/node';
+import { createEmptyNodes } from '../parse/parse';
 
-export function find(path: JsonPath, tree: JsonNode): JsonNode | JsonNode[] | undefined {
+export function find(path: JsonPath, tree: JsonNode, createNotExists = false): JsonNode | JsonNode[] | undefined {
     let node = tree;
 
-    for (let key of path) {
-         if (!node) {
+    for (let i = 0; i < path.length; i++) {
+        const key = path[i];
+
+        if (createNotExists && (!node || !node.value.length)) {
+            const newNode = createEmptyNodes(path.slice(i));
+            node.value.push(newNode);
+            node = newNode;
+
+            continue;
+        } else if (!node) {
             break;
         }
 
@@ -54,3 +63,4 @@ function findNodes(key: JsonPathParam, nodes: JsonNode[]): JsonNode[] {
 
     return result;
 }
+

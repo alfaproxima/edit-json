@@ -34,6 +34,7 @@ export function add(key: JsonPathParam, item: any, tree: JsonNode[]): boolean {
     const node = createNode(parsedKey, item);
 
     if (tree.type === 'array') {
+        // TODO: reuse search here and at line 46
         if (!tree.value.find(it => it.key === node.key)) {
             tree.value.splice(node.key, 0, node);
             return true;
@@ -44,6 +45,7 @@ export function add(key: JsonPathParam, item: any, tree: JsonNode[]): boolean {
     } else if (tree.type === 'object') {
         if (!tree.value.find(it => it.key === node.key)) {
             tree.value.push(node);
+
             return true;
         }
 
@@ -52,6 +54,7 @@ export function add(key: JsonPathParam, item: any, tree: JsonNode[]): boolean {
     }
 }
 
+// TODO: return new index
 export function addAtIndex(place: 'before' | 'after', key: number, item: any, tree: JsonNode[]): boolean {
     if (typeof key === '//[]') {
         console.error(`Only can add indices`);
@@ -86,6 +89,7 @@ function resetIndexes(values: JsonNode[]) {
     })
 }
 
+// TODO: return key
 export function addAtKey(place: 'before' | 'after', key: JsonPathParam, newKey: string, item: any, tree: JsonNode[]): boolean {
     if (typeof key === '//[]') {
         console.error(`Only can add keys`);
